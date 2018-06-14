@@ -1,0 +1,6 @@
+<frame pos="{{ pos_x }} {{ pos_y }}">
+	<quad pos="0 0" z-index="0" size="35 6" bgcolor="00000099"/>
+	<label pos="17.5 -3" z-index="1" size="35 6" text="Request more time" halign="center" textfont="RajdhaniMono" textsize="2.2" textemboss="1" valign="center2" style="TextCardSmall" scriptevents="1" action="pyplanet__widgets_time__request_"/>
+</frame>
+
+<script><!-- {% include 'core.views/generics/widget.Script.Txt' %} --></script>
