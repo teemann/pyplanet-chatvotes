@@ -45,6 +45,12 @@ class Chatvotes(AppConfig):
         self.setting_show_bt = Setting('chatvotes_show_bt', 'Button request time', Setting.CAT_DESIGN,
                                        type=bool, description='Show the button to request more time',
                                        change_target=self.reload, default=True)
+        self.setting_vote_time_ratio = Setting('chatvotes_time_ratio', 'Time vote ratio', Setting.CAT_GENERAL,
+                                               type=float, description='The ratio needed for the additional-time-vote'
+                                                                       'to pass. 0.5 = 50%', default=0.5)
+        self.setting_vote_time_timeout = Setting('chatvotes_time_timeout', 'Time vote timeout', Setting.CAT_GENERAL,
+                                                 type=int, description='The timeout of the additional-time-vote'
+                                                                       'in milliseconds.', default=90000)
 
     async def display(self, logins=None):
         if await self.setting_show_bt.get_value():
@@ -87,6 +93,9 @@ class Chatvotes(AppConfig):
                     description='Minimum time a player has to wait until they can start a new vote'
                                 ' after their last vote failed. In seconds', default=600))
         await self.context.setting.register(self.setting_show_bt)
+        await self.context.setting.register(self.setting_vote_time_ratio)
+        await self.context.setting.register(self.setting_vote_time_timeout)
+
 
         self.instance.signal_manager.listen(mp_signals.map.map_start, self.map_start)
         self.instance.signal_manager.listen(mp_signals.flow.podium_start, self.on_map_end)
@@ -199,8 +208,10 @@ class Chatvotes(AppConfig):
             if tl <= 0:
                 await self.instance.chat('$f00This vote is only available when there is a time limit.', player)
                 return
+        ratio = await self.setting_vote_time_ratio.get_value()
+        timeout = await self.setting_vote_time_timeout.get_value()
         await self.instance.gbx.multicall(
-            self.instance.gbx('CallVoteEx', self.time_vote_call, 0.5, 90000, 1),
+            self.instance.gbx('CallVoteEx', self.time_vote_call, ratio, timeout, 1),
             self.instance.chat(player.nickname + ' $z$fa0$wrequested additional time.')
         )
 
